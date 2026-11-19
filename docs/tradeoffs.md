@@ -9,5 +9,6 @@
 | **Escalabilidade** | Aplicação inteira | Aplicação inteira | Por serviço |
 | **Custo de Desenvolvimento** | Baixo | Médio | Alto |
 
-**Arquitetura escolhida:** Monólito Modular
+**Arquitetura escolhida:** Monólito Modular.
+
 **Justificativa da Escolha:** O Monólito Modular foi escolhido por oferecer o melhor equilíbrio entre modificabilidade/testabilidade e simplicidade operacional. Como a Restrição 4 exige execução nos servidores locais da instituição e a ASR 1 demanda transações ACID rigorosas para trocas atômicas e bloqueio de concorrência, microsserviços adicionariam latência de rede e complexidade distribuída desnecessárias, enquanto um monólito simples comprometeria a evolução independente dos módulos.
