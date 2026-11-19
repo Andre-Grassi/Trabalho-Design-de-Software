@@ -47,15 +47,6 @@ def init_db():
             status TEXT NOT NULL
         );
 
-        CREATE TABLE IF NOT EXISTS agendamento_interesses (
-            id TEXT PRIMARY KEY,
-            usuario_id TEXT NOT NULL,
-            sala_id TEXT NOT NULL,
-            inicio TEXT NOT NULL,
-            fim TEXT NOT NULL,
-            notificado INTEGER NOT NULL
-        );
-
         CREATE TABLE IF NOT EXISTS auditoria_logs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             timestamp TEXT NOT NULL,
@@ -66,7 +57,6 @@ def init_db():
         );
     """)
 
-    # Dados iniciais (Seed) para testes imediatos
     cur.execute("INSERT OR IGNORE INTO autenticacao_usuarios VALUES ('u1', 'Prof. Carlos', 'carlos@ufpr.br', '41999990001', 'DOCENTE', 1)")
     cur.execute("INSERT OR IGNORE INTO autenticacao_usuarios VALUES ('u2', 'Ana (Aluna)', 'ana@ufpr.br', '41999990002', 'ALUNO', 1)")
     cur.execute("INSERT OR IGNORE INTO autenticacao_usuarios VALUES ('u3', 'Técnico Marcos', 'marcos@ufpr.br', '41999990003', 'GESTOR', 1)")
