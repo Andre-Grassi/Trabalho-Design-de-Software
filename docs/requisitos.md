@@ -1,5 +1,5 @@
 ## Contexto
-Reserva de salas e laboratórios: Sistema para reservar espaços acadêmicos considerando capacidade, recursos disponíveis, horários, bloqueios e conflitos entre solicitações 
+**Reserva de salas e laboratórios**: Sistema para reservar espaços acadêmicos considerando capacidade, recursos disponíveis, horários, bloqueios e conflitos entre solicitações 
 
 ## Atores
 **Atores Primários (Humanos):**
