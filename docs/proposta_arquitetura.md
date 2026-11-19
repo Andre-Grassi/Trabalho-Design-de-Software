@@ -87,3 +87,4 @@ o domínio é protegido por meio de uma interface para o módulo de notificaçã
 do código.
 
 # Organização Arquitetural
+Internamente, o sistema organiza-se em camadas lógicas bem definidas dentro do monólito modular: Camada de Apresentação/Entrada (AgendamentoController), Camada de Aplicação (AgendamentoService), Camada de Domínio (Reserva, Sala, PoliticaReserva, Usuario, GradeAcademica) e Camada de Infraestrutura/Adaptadores (repositórios SQL e adaptadores de integração externa), respeitando a Regra de Dependência em direção ao domínio.
