@@ -9,7 +9,7 @@
 8. Enviar notificações, por meio de serviço externo, de mudanças ocorridas no status da reserva (cancelada, aprovada).
 9. Os agendamentos realizados por estudantes devem ser confirmados pelo servidor técnico responsável. Já os realizados pelos docentes devem ser realizados automaticamente.
 
-## Restricoes Relevantes
+## Restrições Relevantes
 1. Deve ser compatível com os navegadores utilizados pela instituição.
 2. Somente usuários com matrícula ou vínculo ativo podem acessar o sistema.
 3. Deve-se utilizar SQL para armazenar as reservas , dados das salas/laboratórios, usuários, política e de auditoria.
@@ -21,7 +21,7 @@
 3. Disponibilidade: O sistema deve garantir alta disponibilidade (ex: 99.5% de uptime) durante o período letivo e horário de funcionamento da instituição (ex: 07h às 23h), garantindo rápida recuperação em caso de falha no servidor da instituição.
 4. Integrabilidade (Interoperabilidade): O sistema deve integrar-se de forma desacoplada aos sistemas centrais da instituição (Sistema de Autenticação e Serviço de Notificações) por meio de APIs REST/JSON padronizadas, permitindo a validação de vínculo ativo e envio de alertas sem acoplamento direto com o banco de dados central.
 
-## justificacao de ASRs
+## justificação de ASRs
 1. Justificativa ASR 1 (Desempenho e Concorrência): O sistema lida com recursos escassos e exclusivos. Os Requisitos Funcionais 1 e 2  exigem que o sistema bloqueie o agendamento em caso de choque de horários. Do ponto de vista arquitetural,será necessário implementar estratégias rígidas de controle de concorrência (como Optimistic/Pessimistic Locking no banco de dados SQL exigido nas restrições) para evitar que dois usuários, que possuem o nível de acesso para realizar reservas instantâneas, consigam o mesmo ambiente na mesma fração de segundo, sem que isso congele o sistema.
 2. Justificativa ASR 2 (Segurança/Rastreabilidade): Os Requisitos Funcionais 7 e 9 definem que apenas usuários autenticados solicitem e administradores aprovem. Em um ambiente acadêmico, disputas por laboratórios concorridos são comuns. A arquitetura exige um módulo transversal de log de auditoria para que seja possível rastrear, por exemplo, qual administrador rejeitou uma reserva ou provar que um aluno cancelou a sua reserva (RF 7) a tempo.
 3. Justificativa ASR 3 (Disponibilidade): Como o agendamento logístico de laboratórios e salas afeta diretamente a execução das aulas, se o sistema ficar fora do ar, professores e alunos ficarão sem saber para onde ir. Como a restrição exige que rode nos "servidores disponibilizados pela instituição" (que muitas vezes possuem recursos limitados), a arquitetura precisa prever resiliência (ex: load balancers ou backups rápidos) para evitar paralisação da operação acadêmica.
