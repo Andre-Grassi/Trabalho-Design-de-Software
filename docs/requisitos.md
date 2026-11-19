@@ -1,4 +1,18 @@
-## Requisitos
+## Contexto
+Reserva de salas e laboratórios: Sistema para reservar espaços acadêmicos considerando capacidade, recursos disponíveis, horários, bloqueios e conflitos entre solicitações 
+
+## Atores
+**Atores Primários (Humanos):**
+  - Requisitante (Docente / Aluno): Quem pesquisa disponibilidade e solicita o agendamento do espaço, com diferentes graus de permissão de acordo com o cargo.
+  - Gestor / Administrador de Espaços: Quem estabelece bloqueios operacionais (limpeza, manutenção) e gera políticas de conflito.
+
+**Atores Secundários (Sistemas e Serviços Externos):**
+  - Sistema de Autenticação: Para validação de identidade.
+  - Serviço de Envio de Notificações: Para comunicar aprovações e cancelamentos.
+  - Agendador do Sistema (Clock / Scheduler): Para cancelar reservas pendentes que expiraram e libertar os espaços.
+  - Sistema de Gestão Acadêmica: Órgão oficial onde é a fonte de horários e salas das aulas no semestre, assim evitando que as reservas feitas pelo sistema conflitam com os horários oficiais de aula, considerando que nem todo professor irá utilizar o sistema.
+
+## Requisitos Funcionais
 1. O sistema deve garantir a exclusividade das reservas, impedindo outras solicitações simultâneas
 2. O sistema deve alterar automaticamente o status do ambiente quando for reservado, ocupado, bloqueado (reserva sendo solicitada) e quando estiver livre para reservar (fora do horário da reserva).
 3. Deve ser possível realizar a consulta de todos os dados de cada ambiente, como: nome da sala(id da sala), nível de permissão,  capacidade, recursos e horário disponíveis.
