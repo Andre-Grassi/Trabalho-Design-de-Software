@@ -1,0 +1,108 @@
+@startuml
+!theme plain
+skinparam componentStyle uml2
+skinparam packageStyle rectangle
+skinparam nodesep 45
+skinparam ranksep 55
+
+actor "Usuário / Cliente Web" as Cliente
+
+package "Unidade de Implantação: Monólito Modular (Sistema de Reservas)" {
+
+  ' === MÓDULO AGENDAMENTO ===
+  package "Módulo Agendamento" as ModAgendamento {
+    portin "API REST / HTTP" as PortHTTP
+    
+    component "AgendamentoController" as CompController
+    component "AgendamentoService\n(Application Service)" as CompAgendService
+    component "ReservaService\n(Domain Service)" as CompReservaService
+    component "PoliticaReserva\n(Domain Policy)" as CompPolitica
+    component "ReservaSQLRepository" as CompReservaSQL
+    component "PoliticaSQLRepository" as CompPoliticaSQL
+
+    interface "IReservaRepository" as IResRepo
+    interface "IPoliticaRepository" as IPolRepo
+
+    PortHTTP --> CompController
+    CompController --> CompAgendService
+    CompAgendService --> CompReservaService
+    CompReservaService --> CompPolitica
+
+    CompReservaSQL -up- IResRepo
+    CompReservaService --( IResRepo
+
+    CompPoliticaSQL -up- IPolRepo
+    CompPolitica --( IPolRepo
+  }
+
+  ' === INTERFACES PÚBLICAS INTER-MÓDULOS ===
+  interface "IAutenticacaoService" as IAuth
+  interface "IAuditoriaService" as IAudit
+  interface "IGradeAcademicaService" as IGrade
+  interface "INotificador" as INotif
+
+  ' === MÓDULO AUTENTICAÇÃO ===
+  package "Módulo Autenticacao" as ModAuth {
+    component "AutenticacaoService" as CompAuthService
+    component "UsuarioSQLRepository" as CompUserSQL
+    interface "IUsuarioRepository" as IUserRepo
+
+    CompUserSQL -up- IUserRepo
+    CompAuthService --( IUserRepo
+  }
+
+  ' === MÓDULO AUDITORIA ===
+  package "Módulo Auditoria" as ModAudit {
+    component "AuditoriaService" as CompAuditService
+    component "AuditoriaSQLRepository" as CompAuditSQL
+    interface "IAuditoriaRepository" as IAuditRepo
+
+    CompAuditSQL -up- IAuditRepo
+    CompAuditService --( IAuditRepo
+  }
+
+  ' === MÓDULO INTEGRAÇÃO ACADÊMICA ===
+  package "Módulo IntegracaoAcademica" as ModAcad {
+    component "GradeAcademicaAdapter\n(Cliente HTTP)" as CompGradeAdapter
+  }
+
+  ' === MÓDULO NOTIFICAÇÃO ===
+  package "Módulo Notificacao" as ModNotif {
+    component "EmailNotificador" as CompEmail
+    component "WhatsAppNotificador" as CompWhats
+  }
+
+  ' === CONEXÕES BALL-AND-SOCKET ENTRE MÓDULOS ===
+  CompAuthService -up- IAuth
+  CompAuditService -up- IAudit
+  CompGradeAdapter -up- IGrade
+  CompEmail -up- INotif
+  CompWhats -up- INotif
+
+  CompAgendService --( IAuth
+  CompAgendService --( IAudit
+  CompAgendService --( IGrade
+  CompAgendService --( INotif
+}
+
+' === BANCOS DE DADOS ISOLADOS POR MÓDULO ===
+database "BD Agendamento (SQL)\n(reservas, salas, politicas)" as DBAgendamento
+database "BD Autenticacao (SQL)\n(usuarios, vinculos)" as DBAuth
+database "BD Auditoria (SQL)\n(logs_auditoria)" as DBAudit
+
+' === SISTEMAS EXTERNOS ===
+cloud "Sistema de Gestão\nAcadêmica (Externo)" as APIAcademica
+cloud "Serviços de Mensageria\n(Servidor SMTP / API WhatsApp)" as APINotif
+
+' === LIGAÇÕES EXTERNAS ===
+Cliente --> PortHTTP : JSON / HTTPS
+
+CompReservaSQL --> DBAgendamento : SQL / Transacional
+CompPoliticaSQL --> DBAgendamento : SQL / Leitura
+CompUserSQL --> DBAuth : SQL / Leitura
+CompAuditSQL --> DBAudit : SQL / Append-Only
+
+CompGradeAdapter --> APIAcademica : REST / HTTPS
+CompEmail --> APINotif : SMTP
+CompWhats --> APINotif : REST / HTTPS
+@enduml

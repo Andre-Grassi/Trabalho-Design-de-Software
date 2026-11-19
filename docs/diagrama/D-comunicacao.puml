@@ -1,0 +1,39 @@
+@startuml
+!theme plain
+!pragma layout smetana
+scale 3
+skinparam nodesep 50
+skinparam ranksep 80
+
+object "Usuário" as User
+object ":AgendamentoController" as Ctrl
+object ":AgendamentoService" as Svc
+
+together {
+  object ":IAutenticacaoService" as Auth
+  object ":ISalaRepository" as SalaRepo
+  object ":IPoliticaRepository" as PolRepo
+  object ":IGradeAcademicaService" as GradeSvc
+}
+
+together {
+  object ":IReservaRepository" as ResRepo
+  object ":PoliticaReserva" as Pol
+  object "nova:Reserva" as Res
+  object ":IAuditoriaService" as Audit
+  object ":INotificador" as Notif
+}
+
+User -- Ctrl : 1: → solicitarReserva(dados, ip)
+Ctrl -- Svc : 1.1: → solicitarReserva(dados, ip)
+
+Svc -- Auth : 1.1.1: → validarVinculo(usuarioId)
+Svc -- SalaRepo : 1.1.2: → buscarPorId(salaId)
+Svc -- PolRepo : 1.1.3: → obterPoliticaPorPerfil(perfil)
+Svc -- GradeSvc : 1.1.4: → obterGradeDaSala(salaId)
+Svc -- ResRepo : 1.1.5: → buscarPorSalaEPeriodo(...)\n1.1.6: → buscarAtivasPorUsuario(...)\n1.1.11: → salvar(nova)
+Svc -- Pol : 1.1.7: → validarSolicitacao(...)\n1.1.8: → validarCotaReservasAtivas(...)\n1.1.9: → validarConflitoAgendaUsuario(...)
+Svc -- Res : 1.1.10: → <<create>> Reserva(...)
+Svc -- Audit : 1.1.12: → registrar(evento)
+Svc -- Notif : 1.1.13: → enviarNotificacao(usuario, nova)
+@enduml
