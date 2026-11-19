@@ -1,4 +1,5 @@
 | **Critério** | **Monólito Simples** | **Monólito Modular** | **Microsserviços** |
+|---|---|---|---|
 | **Modificabilidade** | Médio | Alto | Alto |
 | **Desempenho** | Alto | Alto |  Variável |
 | **Disponibilidade** | Menor isolamento de falhas | Menor isolamento de falhas | Maior isolamento de falhas |
