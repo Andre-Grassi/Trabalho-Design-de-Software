@@ -295,3 +295,18 @@ class TestAuditoriaAPI:
         acoes = [log["acao"] for log in r_ent.json()]
         assert "RESERVA_PENDENTE" in acoes
         assert "APROVACAO_RESERVA" in acoes
+
+
+class TestGUIServing:
+    def test_gui_raiz_e_arquivos_estaticos(self):
+        from fastapi.testclient import TestClient
+        from src.main import app
+
+        gui_client = TestClient(app)
+        resp_index = gui_client.get("/")
+        assert resp_index.status_code == 200
+        assert "text/html" in resp_index.headers["content-type"]
+        assert "Reserva de Salas e Laboratórios" in resp_index.text
+
+        assert gui_client.get("/static/styles.css").status_code == 200
+        assert gui_client.get("/static/app.js").status_code == 200
