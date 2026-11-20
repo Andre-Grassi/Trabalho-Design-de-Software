@@ -47,7 +47,7 @@ python -m uvicorn src.main:app --reload
 ### 3. Acessando a Aplicação e Documentação Interativa
 
 Após iniciar o servidor, a API estará acessível em:
-- **Aplicação:** [http://127.0.0.1:8000](http://127.0.0.1:8000)
+- **Interface Web de Testes (GUI):** [http://127.0.0.1:8000](http://127.0.0.1:8000) (permite testar interativamente todos os fluxos descritos abaixo com inspetor HTTP)
 - **Documentação Swagger (Swagger UI):** [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 - **Documentação Redoc:** [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)
 

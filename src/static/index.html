@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sistema de Reserva de Salas — Interface de Testes</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">UF</div>
+        <div>
+          <h1>Reserva de Salas e Laboratórios</h1>
+          <p class="subtitle">GUI de Testes da API — Arquitetura Monólito Modular</p>
+        </div>
+      </div>
+
+      <div class="topbar-controls">
+        <div class="persona-box">
+          <label for="global-user">Usuário Ativo</label>
+          <div class="persona-row">
+            <select id="global-user">
+              <option value="u1">u1 — Prof. Carlos (DOCENTE)</option>
+              <option value="u2">u2 — Ana (ALUNO)</option>
+              <option value="u3">u3 — Técnico Marcos (GESTOR)</option>
+              <option value="custom">Outro ID (testar 403)...</option>
+            </select>
+            <input
+              type="text"
+              id="global-user-custom"
+              class="hidden"
+              placeholder="ex: inexistente"
+              aria-label="ID de usuário customizado"
+            />
+          </div>
+          <span id="persona-policy" class="policy-hint"></span>
+        </div>
+
+        <nav class="doc-links" aria-label="Documentação da API">
+          <a href="/docs" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">Swagger /docs</a>
+          <a href="/redoc" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">ReDoc</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="workspace">
+      <div class="tabs" role="tablist" aria-label="Fluxos da API">
+        <button class="tab active" role="tab" aria-selected="true" data-tab="salas">
+          1. Salas Disponíveis
+        </button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="reservas">
+          2. Reservar &amp; Troca Atômica
+        </button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="gerenciar">
+          3. Avaliar &amp; Cancelar
+        </button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="auditoria">
+          4. Auditoria (ASR 2)
+        </button>
+      </div>
+
+      <!-- TAB 1: SALAS -->
+      <div id="tab-salas" class="tab-panel active" role="tabpanel">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2>Consultar Salas Disponíveis</h2>
+              <p class="muted"><code>GET /salas</code> — Filtra por nível de permissão do perfil e, opcionalmente, por disponibilidade de horário (Grade Acadêmica + reservas ativas).</p>
+            </div>
+          </div>
+
+          <div class="presets">
+            <span class="presets-label">Exemplos do README:</span>
+            <button type="button" class="chip" id="preset-salas-ana">Todas da Ana (u2)</button>
+            <button type="button" class="chip" id="preset-salas-horario">Docente (u1) 14h–16h</button>
+            <button type="button" class="chip" id="preset-salas-grade">Conflito Grade (u1) 08h30–09h30</button>
+          </div>
+
+          <form id="form-salas" class="form-grid">
+            <div class="field">
+              <label for="salas-usuario">Usuário (<code>usuario_id</code>)</label>
+              <input type="text" id="salas-usuario" value="u1" required />
+            </div>
+            <div class="field">
+              <label for="salas-inicio">Início (opcional)</label>
+              <input type="datetime-local" id="salas-inicio" />
+            </div>
+            <div class="field">
+              <label for="salas-fim">Fim (opcional)</label>
+              <input type="datetime-local" id="salas-fim" />
+            </div>
+            <div class="field field-actions">
+              <button type="submit" class="btn btn-primary">Consultar Salas</button>
+              <button type="button" id="btn-limpar-horario-salas" class="btn btn-secondary">Sem horário</button>
+            </div>
+          </form>
+
+          <div id="salas-feedback" class="feedback hidden"></div>
+          <div id="salas-lista" class="salas-grid">
+            <p class="empty-state">Clique em <strong>Consultar Salas</strong> para listar os espaços disponíveis.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: RESERVAR & TROCA -->
+      <div id="tab-reservas" class="tab-panel" role="tabpanel">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2>Solicitar Reserva</h2>
+              <p class="muted"><code>POST /reservas</code> — Docentes recebem confirmação automática em salas comuns; alunos e laboratórios restritos ficam <code>PENDENTE</code>.</p>
+            </div>
+          </div>
+
+          <div class="presets">
+            <span class="presets-label">Exemplos rápidos:</span>
+            <button type="button" class="chip" id="preset-res-docente">Ex. A: Docente (u1, PA-04, 10h–12h)</button>
+            <button type="button" class="chip" id="preset-res-aluno">Ex. B: Aluna (u2, LAB-REDES, 14h–16h)</button>
+            <button type="button" class="chip" id="preset-res-conflito">Conflito Docente (u1, LAB-REDES, 10h–12h)</button>
+            <button type="button" class="chip" id="preset-res-restrito">Lab Restrito p/ Aluna (403)</button>
+          </div>
+
+          <form id="form-reserva" class="form-grid">
+            <div class="field">
+              <label for="res-usuario">Usuário (<code>usuario_id</code>)</label>
+              <input type="text" id="res-usuario" value="u1" required />
+            </div>
+            <div class="field">
+              <label for="res-sala">Sala (<code>sala_id</code>)</label>
+              <select id="res-sala">
+                <option value="s1">s1 — PA-04 (Sala de Aula · Lotação 40)</option>
+                <option value="s2">s2 — LAB-REDES (Laboratório · Lotação 25)</option>
+                <option value="s3">s3 — LAB-PESQUISA (Lab Restrito · Lotação 15)</option>
+                <option value="s999">s999 — Sala Inexistente (testar 404)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="res-qtd">Qtd. Pessoas</label>
+              <input type="number" id="res-qtd" min="1" max="100" value="25" required />
+            </div>
+            <div class="field">
+              <label for="res-inicio">Início</label>
+              <input type="datetime-local" id="res-inicio" required />
+            </div>
+            <div class="field">
+              <label for="res-fim">Fim</label>
+              <input type="datetime-local" id="res-fim" required />
+            </div>
+            <div class="field field-actions">
+              <button type="submit" class="btn btn-primary">Solicitar Reserva</button>
+            </div>
+          </form>
+
+          <div id="reserva-feedback" class="feedback hidden"></div>
+
+          <!-- Banner interativo para 409 CONFLITO_AGENDA_USUARIO -->
+          <div id="conflito-banner" class="conflict-banner hidden">
+            <div class="conflict-text">
+              <strong>Conflito de agenda detectado (HTTP 409)</strong>
+              <p id="conflito-msg"></p>
+            </div>
+            <button type="button" id="btn-executar-troca-rapida" class="btn btn-warning">
+              Executar Troca Atômica Agora
+            </button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2>Substituição Atômica de Reserva (Troca)</h2>
+              <p class="muted"><code>POST /reservas/{reserva_antiga_id}/troca</code> — Cancela a reserva anterior e cria a nova em uma única transação ACID.</p>
+            </div>
+          </div>
+
+          <form id="form-troca" class="form-grid">
+            <div class="field">
+              <label for="troca-antiga-id">ID da Reserva Antiga</label>
+              <input type="text" id="troca-antiga-id" placeholder="ex: res-a1b2c3d4" required />
+            </div>
+            <div class="field">
+              <label for="troca-usuario">Usuário (<code>usuario_id</code>)</label>
+              <input type="text" id="troca-usuario" value="u1" required />
+            </div>
+            <div class="field">
+              <label for="troca-sala">Nova Sala (<code>sala_id</code>)</label>
+              <select id="troca-sala">
+                <option value="s2">s2 — LAB-REDES (Laboratório · Lotação 25)</option>
+                <option value="s1">s1 — PA-04 (Sala de Aula · Lotação 40)</option>
+                <option value="s3">s3 — LAB-PESQUISA (Lab Restrito · Lotação 15)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="troca-qtd">Qtd. Pessoas</label>
+              <input type="number" id="troca-qtd" min="1" max="100" value="15" required />
+            </div>
+            <div class="field">
+              <label for="troca-inicio">Novo Início</label>
+              <input type="datetime-local" id="troca-inicio" required />
+            </div>
+            <div class="field">
+              <label for="troca-fim">Novo Fim</label>
+              <input type="datetime-local" id="troca-fim" required />
+            </div>
+            <div class="field field-actions">
+              <button type="submit" class="btn btn-warning">Executar Troca Atômica</button>
+            </div>
+          </form>
+
+          <div id="troca-feedback" class="feedback hidden"></div>
+        </div>
+      </div>
+
+      <!-- TAB 3: AVALIAR & CANCELAR -->
+      <div id="tab-gerenciar" class="tab-panel" role="tabpanel">
+        <div class="two-cards">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h2>Avaliar Reserva Pendente</h2>
+                <p class="muted"><code>POST /reservas/{id}/avaliar</code> — Ação exclusiva do perfil <code>GESTOR</code> (<code>u3</code>).</p>
+              </div>
+            </div>
+
+            <form id="form-avaliar" class="form-stack">
+              <div class="field">
+                <label for="aval-reserva-id">ID da Reserva Pendente</label>
+                <input type="text" id="aval-reserva-id" placeholder="ex: res-a1b2c3d4" required />
+              </div>
+              <div class="field">
+                <label for="aval-aprovador">Aprovador (<code>aprovador_id</code>)</label>
+                <input type="text" id="aval-aprovador" value="u3" required />
+              </div>
+              <div class="btn-row">
+                <button type="button" id="btn-aprovar" class="btn btn-success">Aprovar (true)</button>
+                <button type="button" id="btn-rejeitar" class="btn btn-danger">Rejeitar (false)</button>
+              </div>
+            </form>
+
+            <div id="avaliar-feedback" class="feedback hidden"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h2>Cancelar Reserva</h2>
+                <p class="muted"><code>POST /reservas/{id}/cancelar</code> — Solicitante ou Gestor pode cancelar antes do horário de início.</p>
+              </div>
+            </div>
+
+            <form id="form-cancelar" class="form-stack">
+              <div class="field">
+                <label for="canc-reserva-id">ID da Reserva</label>
+                <input type="text" id="canc-reserva-id" placeholder="ex: res-a1b2c3d4" required />
+              </div>
+              <div class="field">
+                <label for="canc-usuario">Usuário (<code>usuario_id</code>)</label>
+                <input type="text" id="canc-usuario" value="u1" required />
+              </div>
+              <div class="btn-row">
+                <button type="submit" class="btn btn-danger">Cancelar Reserva</button>
+              </div>
+            </form>
+
+            <div id="cancelar-feedback" class="feedback hidden"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: AUDITORIA -->
+      <div id="tab-auditoria" class="tab-panel" role="tabpanel">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2>Trilha de Auditoria (ASR 2)</h2>
+              <p class="muted"><code>GET /auditoria</code> — Logs imutáveis (append-only). Acesso restrito a usuários <code>GESTOR</code> (<code>u3</code>).</p>
+            </div>
+          </div>
+
+          <form id="form-auditoria" class="form-grid">
+            <div class="field">
+              <label for="audit-gestor">Gestor (<code>gestor_id</code>)</label>
+              <input type="text" id="audit-gestor" value="u3" required />
+            </div>
+            <div class="field">
+              <label for="audit-entidade">Entidade (<code>entidade_id</code>, opcional)</label>
+              <input type="text" id="audit-entidade" placeholder="ex: res-a1b2c3d4 ou s2" />
+            </div>
+            <div class="field field-actions">
+              <button type="submit" class="btn btn-primary">Consultar Logs</button>
+              <button type="button" id="btn-limpar-audit" class="btn btn-secondary">Limpar filtro</button>
+            </div>
+          </form>
+
+          <div id="auditoria-feedback" class="feedback hidden"></div>
+
+          <div class="table-wrap">
+            <table class="audit-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Timestamp</th>
+                  <th>Ação</th>
+                  <th>Usuário</th>
+                  <th>Entidade</th>
+                  <th>IP</th>
+                </tr>
+              </thead>
+              <tbody id="auditoria-tbody">
+                <tr>
+                  <td colspan="6" class="empty-cell">Clique em <strong>Consultar Logs</strong> para carregar a trilha de auditoria.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SIDEBAR: SESSÃO & INSPETOR HTTP -->
+    <aside class="sidebar">
+      <div class="card">
+        <div class="card-header compact">
+          <h3>Reservas desta Sessão</h3>
+          <button type="button" id="btn-limpar-sessao" class="btn btn-ghost btn-xs">Limpar</button>
+        </div>
+        <p class="muted small">Atalho local para copiar IDs e testar aprovação, troca, cancelamento e auditoria.</p>
+        <div id="session-reservas" class="session-list">
+          <p class="empty-state small">Nenhuma reserva criada ainda nesta sessão.</p>
+        </div>
+      </div>
+
+      <div class="card inspector-card">
+        <div class="card-header compact">
+          <h3>Inspetor HTTP</h3>
+          <div class="inspector-meta">
+            <span id="http-status" class="status-pill neutral">Aguardando</span>
+            <span id="http-latency" class="latency"></span>
+          </div>
+        </div>
+
+        <div class="request-line">
+          <code id="http-request">Nenhuma requisição executada</code>
+          <button type="button" id="btn-copy-curl" class="btn btn-ghost btn-xs" disabled>Copiar curl</button>
+        </div>
+
+        <pre id="http-response" class="json-viewer">{}</pre>
+
+        <div class="history-section">
+          <span class="history-title">Histórico Recente</span>
+          <ul id="http-history" class="history-list">
+            <li class="empty-state small">As requisições feitas aparecerão aqui.</li>
+          </ul>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

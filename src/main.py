@@ -1,4 +1,7 @@
+from pathlib import Path
 from fastapi import FastAPI
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from src.agendamento.controller import AgendamentoController
 from src.agendamento.repositories import (
     PoliticaSQLRepository,
@@ -38,3 +41,11 @@ agendamento_service = AgendamentoService(
 
 controller = AgendamentoController(agendamento_service)
 app.include_router(controller.router)
+
+STATIC_DIR = Path(__file__).resolve().parent / "static"
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+
+@app.get("/", include_in_schema=False)
+def serve_gui():
+    return FileResponse(STATIC_DIR / "index.html")
