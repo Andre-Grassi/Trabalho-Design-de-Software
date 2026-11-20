@@ -174,4 +174,15 @@ curl -X GET "http://127.0.0.1:8000/auditoria?gestor_id=u3"
 curl -X GET "http://127.0.0.1:8000/auditoria?gestor_id=u3&entidade_id=ID_DA_RESERVA"
 ```
 
+---
+
+## Executando os Testes Automatizados
+
+O projeto possui uma suíte de testes unitários, de integração (concorrência ACID, triggers de integridade do SQLite e substituição de dependências externas via DIP) e de API HTTP em `tests/`:
+
+```bash
+python -m pytest -v
+```
+
+
 
