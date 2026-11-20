@@ -1,3 +1,5 @@
+# Dependência Externa
+
 - **Serviço de Notificação**  
 O sistema de notificação possui dependência externa de serviços de mensagens como email e whatsapp para efetuar o serviço de enviar notificação para o usuário. Isso significa que, se o usuário não possuir estes serviços ou não cadastrar no sistema, não tem como o sistema enviar os avisos aos usuários.
 
