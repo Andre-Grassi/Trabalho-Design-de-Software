@@ -2,10 +2,16 @@ from abc import ABC, abstractmethod
 from typing import Optional
 from .domain import Usuario
 
+
 class IUsuarioRepository(ABC):
     @abstractmethod
     def buscar_por_id(self, usuario_id: str) -> Optional[Usuario]:
         pass
+
+    @abstractmethod
+    def buscar_por_email(self, email: str) -> Optional[Usuario]:
+        pass
+
 
 class IAutenticacaoService(ABC):
     @abstractmethod

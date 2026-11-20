@@ -1,35 +1,40 @@
 from fastapi import FastAPI
-from database import init_db
-from autenticacao.service import UsuarioSQLRepository, AutenticacaoService
-from auditoria.repositories import AuditoriaSQLRepository
-from auditoria.service import AuditoriaService
-from integracao_academica.adapter import GradeAcademicaAdapter
-from notificacao.adapters import EmailNotificador
-from agendamento.repositories import (
+from src.agendamento.controller import AgendamentoController
+from src.agendamento.repositories import (
+    PoliticaSQLRepository,
     ReservaSQLRepository,
     SalaSQLRepository,
-    PoliticaSQLRepository,
 )
-from agendamento.service import AgendamentoService
-from agendamento.controller import criar_router
+from src.agendamento.service import AgendamentoService
+from src.auditoria.repositories import AuditoriaSQLRepository
+from src.auditoria.service import AuditoriaService
+from src.autenticacao.service import AutenticacaoService, UsuarioSQLRepository
+from src.database import init_db
+from src.integracao_academica.adapter import GradeAcademicaAdapter
+from src.notificacao.adapters import EmailNotificador
 
 app = FastAPI(
     title="Sistema de Reserva de Salas e Laboratórios",
-    description="Protótipo Funcional — Arquitetura Monólito Modular (DIP + Transações ACID)",
+    description=(
+        "Protótipo Funcional — Arquitetura Monólito Modular "
+        "(DIP + Transações ACID + Auditoria/Notificação Assíncronas)"
+    ),
     version="1.0.0",
 )
 
 init_db()
 
-audit_repo = AuditoriaSQLRepository()
-service = AgendamentoService(
+auth_service = AutenticacaoService(UsuarioSQLRepository())
+audit_service = AuditoriaService(AuditoriaSQLRepository())
+agendamento_service = AgendamentoService(
     reserva_repo=ReservaSQLRepository(),
     sala_repo=SalaSQLRepository(),
     politica_repo=PoliticaSQLRepository(),
-    auth_service=AutenticacaoService(UsuarioSQLRepository()),
-    audit_service=AuditoriaService(audit_repo),
+    auth_service=auth_service,
+    audit_service=audit_service,
     grade_service=GradeAcademicaAdapter(),
     notificador=EmailNotificador(),
 )
 
-app.include_router(criar_router(service, audit_repo))
+controller = AgendamentoController(agendamento_service)
+app.include_router(controller.router)

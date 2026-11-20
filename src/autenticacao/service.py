@@ -1,23 +1,36 @@
 from typing import Optional
-from database import get_connection
-from .domain import Usuario, PerfilUsuario
-from .interfaces import IUsuarioRepository, IAutenticacaoService
+from src.database import get_connection
+from .domain import PerfilUsuario, Usuario
+from .interfaces import IAutenticacaoService, IUsuarioRepository
+
 
 class UsuarioSQLRepository(IUsuarioRepository):
-    def buscar_por_id(self, usuario_id: str) -> Optional[Usuario]:
-        conn = get_connection()
-        row = conn.execute("SELECT * FROM autenticacao_usuarios WHERE id = ?", (usuario_id,)).fetchone()
-        conn.close()
-        if not row:
-            return None
+    def _row_to_entity(self, row) -> Usuario:
         return Usuario(
             id=row["id"],
             nome=row["nome"],
             email=row["email"],
             telefone=row["telefone"] or "",
             perfil=PerfilUsuario(row["perfil"]),
-            vinculo_ativo=bool(row["vinculo_ativo"])
+            vinculo_ativo=bool(row["vinculo_ativo"]),
         )
+
+    def buscar_por_id(self, usuario_id: str) -> Optional[Usuario]:
+        conn = get_connection()
+        row = conn.execute(
+            "SELECT * FROM autenticacao_usuarios WHERE id = ?", (usuario_id,)
+        ).fetchone()
+        conn.close()
+        return self._row_to_entity(row) if row else None
+
+    def buscar_por_email(self, email: str) -> Optional[Usuario]:
+        conn = get_connection()
+        row = conn.execute(
+            "SELECT * FROM autenticacao_usuarios WHERE email = ?", (email,)
+        ).fetchone()
+        conn.close()
+        return self._row_to_entity(row) if row else None
+
 
 class AutenticacaoService(IAutenticacaoService):
     def __init__(self, usuario_repo: IUsuarioRepository):

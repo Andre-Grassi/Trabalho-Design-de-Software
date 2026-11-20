@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
-from datetime import datetime
+from .domain import GradeAcademica
+
 
 class IGradeAcademicaService(ABC):
     @abstractmethod
-    def possui_aula_no_horario(self, sala_id: str, inicio: datetime, fim: datetime) -> bool:
+    def obter_grade_da_sala(self, sala_id: str) -> GradeAcademica:
         pass
