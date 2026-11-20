@@ -1,6 +1,6 @@
 # Trabalho-Design-de-Software
 Trabalho Design de Software 2026/2 UFPR BCC
-- **Autores:**  
+## **Autores:**  
 Andre Grassi de Jesus  
 Gabriel Bardini Bessa  
 Mauricio Takechi Hirata  
