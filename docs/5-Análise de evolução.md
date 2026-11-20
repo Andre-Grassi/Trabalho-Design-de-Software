@@ -1,4 +1,7 @@
 # Se uma das principais tecnologias ou integrações utilizadas precisasse ser substituída, quais partes do sistema seriam afetadas?
 
+- **Mudança no mecanismo de persistência**
+O sistema utiliza para os bancos de dados o SQLite3, porém o acesso ao banco de dados se dá através de uma interface, que abstrai as operações. Dessa forma, com a mudança no mecanismo de persistência a infraestrutura muda, bem como a classe concreta (implementação da interface do repositório), porém a propagação das mudanças no código se encerra nesse ponto, o restante é protegido pela interface. A decisão arquitetura que facilita esse processo de mudança é a adoção do padrão Repository.
 
-## Duas ou mais mudanças possíveis:
+- **Mudança no mecanismo de notificação**
+O envio de avisos aos usuários é abstraído pela interface pública INotificador, que define um contrato agnóstico em relação ao canal ou provedor utilizado. Caso seja necessário substituir o serviço atual (por exemplo, trocar o servidor SMTP ou a API do WhatsApp por outro provedor ou por notificações Push), apenas a camada interna do Módulo Notificacao e a respectiva classe concreta do adaptador (EmailNotificador ou WhatsAppNotificador) precisam ser alteradas ou substituídas por uma nova implementação. A propagação da mudança se encerra nessa fronteira, mantendo o AgendamentoService e todas as regras de negócio intactos. As decisões arquiteturais que garantem esse isolamento são a aplicação do padrão Strategy e Inversão de Dependências.
