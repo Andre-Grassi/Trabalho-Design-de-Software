@@ -18,9 +18,11 @@ package "Unidade de Implantação: Monólito Modular (Sistema de Reservas)" {
     component "ReservaService\n(Domain Service)" as CompReservaService
     component "PoliticaReserva\n(Domain Policy)" as CompPolitica
     component "ReservaSQLRepository" as CompReservaSQL
+    component "SalaSQLRepository" as CompSalaSQL
     component "PoliticaSQLRepository" as CompPoliticaSQL
 
     interface "IReservaRepository" as IResRepo
+    interface "ISalaRepository" as ISalaRepo
     interface "IPoliticaRepository" as IPolRepo
 
     PortHTTP --> CompController
@@ -30,6 +32,9 @@ package "Unidade de Implantação: Monólito Modular (Sistema de Reservas)" {
 
     CompReservaSQL -up- IResRepo
     CompReservaService --( IResRepo
+
+    CompSalaSQL -up- ISalaRepo
+    CompReservaService --( ISalaRepo
 
     CompPoliticaSQL -up- IPolRepo
     CompPolitica --( IPolRepo
@@ -98,8 +103,9 @@ cloud "Serviços de Mensageria\n(Servidor SMTP / API WhatsApp)" as APINotif
 Cliente --> PortHTTP : JSON / HTTPS
 
 CompReservaSQL --> DBAgendamento : SQL / Transacional
+CompSalaSQL --> DBAgendamento : SQL / Leitura
 CompPoliticaSQL --> DBAgendamento : SQL / Leitura
-CompUserSQL --> DBAuth : SQL / Leitura
+CompUserSQL --> DBAuth : SQL / Leitura e Escrita
 CompAuditSQL --> DBAudit : SQL / Append-Only
 
 CompGradeAdapter --> APIAcademica : REST / HTTPS
